@@ -18,7 +18,7 @@ var Game = function(){
   this.level = 1;
   this.currentLevel = new Level(1);
   this.currentPlayer = new Player();
-  this.getKeyPress;
+  this.currentCharlee = new Charlee();
 
 }
 
@@ -37,17 +37,21 @@ Game.prototype.gameManager = function(){
     this.audio.addUri('sounds/breakoutLoop5.mp3',7990,"loop5");
     this.sounds = {gameOver: new Audio('sounds/breakoutGameOver.mp3'), normalHit: new Audio('sounds/SG280_BD_11.mp3'), lightHit: new Audio('sounds/SG280_Bongo_08.mp3'), powerUp: new Audio('sounds/SG280_Cym_01.mp3'), steady: new Audio('sounds/SG280_Tom_02.mp3'), mediumHit: new Audio('sounds/SG280_SD_02.mp3')};
     // this.audio = new Audio('sounds/breakoutLoop1.mp3');
-    this.pointImage.src = "images/point.png"; // load all assets now so
+    //tileSheet was here
+    this.tileSheet = new Image();
+    this.tileSheet.src = "images/charlee.png"; // load all assets now so
     var t = this;
     this.$canvas.mousemove(function(e){
       t.currentPlayer.x = e.offsetX-((t.currentLevel.bricks[0].w)/2);
       //console.log("x: "+e.offsetX+"y: "+e.offsetY);
     });
+    console.log(this);
     this.$canvas.click(function() {
       t.isTheMouseBeingPressed = true;
     });
     $(window).keypress(function(e){
       t.getKeyPress = e;
+      t.getOtherKeyPress = e;
     });
     this.appState = STATE_INIT;
     break;
@@ -73,6 +77,83 @@ Game.prototype.gameManager = function(){
   }
 };
 
+Game.prototype.renderCharlee = function(){
+  if(this.getOtherKeyPress){
+    console.log(this.getOtherKeyPress);
+    //console.log(this.currentCharlee);
+    switch (this.getOtherKeyPress.keyCode) {
+
+			case undefined:
+      			console.log(this.getOtherKeyPress);
+ 				 this.currentCharlee.frameIndex=0;
+				 break;
+			case 115:
+  			this.currentCharlee.sourceX=50;
+				this.currentCharlee.sourceY=0;
+				this.currentCharlee.x=this.currentCharlee.x+this.currentCharlee.dx;
+				if (this.currentCharlee.frameIndex==this.currentCharlee.animationFrames.length-1){
+					this.currentCharlee.frameIndex=6;
+				} else {
+					this.currentCharlee.frameIndex++;
+				}
+ 				break;
+			case 'rightstop':
+ 				this.currentCharlee.frameIndex=3;
+				GetKeyCodeVar=0;
+ 				break;
+ 			case 119:
+ 				this.currentCharlee.sourceX=50;
+				this.currentCharlee.sourceY=50;
+				this.currentCharlee.x=this.currentCharlee.x-this.currentCharlee.dx; //horizonal
+				if (this.currentCharlee.frameIndex==this.currentCharlee.animationFrames.length-1){
+					this.currentCharlee.frameIndex=7;
+				} else {
+					this.currentCharlee.frameIndex++;
+				}
+ 			break;
+ 			case 'leftstop':
+ 				this.currentCharlee.frameIndex=3;
+				GetKeyCodeVar=0;
+ 			break;
+ 			case 100:
+ 				this.currentCharlee.sourceX=50;
+				this.currentCharlee.sourceY=100;
+				this.currentCharlee.y=this.currentCharlee.y+this.currentCharlee.dy; //vertical
+				if (this.currentCharlee.frameIndex==this.currentCharlee.animationFrames.length-3){
+					this.currentCharlee.frameIndex=2;
+				} else {
+					this.currentCharlee.frameIndex++;
+				}
+ 				break;
+ 			case 'downstop':
+ 				this.currentCharlee.frameIndex=3;
+				GetKeyCodeVar=0;
+ 			break;
+ 			case 97:
+ 				this.currentCharlee.sourceX=50;
+				this.currentCharlee.sourceY=100;
+				this.currentCharlee.y=this.currentCharlee.y-this.currentCharlee.dy; //vertical
+				if (this.currentCharlee.frameIndex==this.currentCharlee.animationFrames.length-3){
+					this.currentCharlee.frameIndex=2;
+				} else {
+					this.currentCharlee.frameIndex++;
+				}
+ 			break;
+  			case 'upstop':
+ 				this.currentCharlee.frameIndex=3;
+				GetKeyCodeVar=0;
+ 			break;
+
+		}
+    this.getOtherKeyPress = undefined;
+  }
+  this.currentCharlee.sourceX=Math.floor(this.currentCharlee.animationFrames[this.currentCharlee.frameIndex] % 12) *50;
+  this.c.drawImage(this.tileSheet, this.currentCharlee.sourceX,this.currentCharlee.sourceY,50,50,this.curcurrentCharleex,this.currentCharlee.y,100,100);
+  this.c.fillRect(this.currentCharlee.y,this.currentCharlee.x,100,100);
+
+}
+
+
 Game.prototype.loadingLevelScreen = function(){
   if (this.firstRun) {
     this.audio.start("loop2");
@@ -96,45 +177,6 @@ Game.prototype.loadingLevelScreen = function(){
     this.appState = STATE_PLAYING;
   }
 }
-
-Game.prototype.gameOverScreen = function(){
-  if (this.firstRun) {
-    this.sounds.gameOver.play();
-    this.firstRun = false;
-  }
-  this.c.fillStyle = '#000111';
-  this.c.fillRect(0, 0, canvas.width, canvas.height);
-  //Box
-  this.c.strokeStyle = '#000000';
-  this.c.font = " "+ canvas.width / 10 + "px serif";
-  this.c.fillStyle = "#fff";
-  this.c.fillText ("GameOver :(",canvas.width / 4, canvas.height / 2);
-  this.c.font = " "+ canvas.width / 30 + "px serif";
-  this.c.fillText("Click to Try Again...",canvas.width / 2.8, canvas.height / 1.5);
-  if (this.isTheMouseBeingPressed == true) {
-    this.changeStateAndRestartGame();
-  }
-}
-
-Game.prototype.winnerScreen = function() {
-  if (this.firstRun) {
-    this.audio.start("loop4");
-    this.firstRun = false;
-  }
-  //new code
-  this.c.fillStyle = '#000111';
-  this.c.fillRect(0, 0, canvas.width, canvas.height);
-  //Box
-  this.c.strokeStyle = '#000000';
-  this.c.font = " "+ canvas.width / 10 + "px serif";
-  this.c.fillStyle = "#fff";
-  this.c.fillText ("You Won!",canvas.width / 4, canvas.height / 2);
-  this.c.font = " "+ canvas.width / 30 + "px serif";
-  this.c.fillText("Game by: Neil Larion, Matt Rosanio, Will Johnson, and Michael Smith", canvas.width / 40, canvas.height / 1.5);
-  if (this.isTheMouseBeingPressed == true) {
-    this.changeStateAndRestartGame();
-  }
-};
 
 Game.prototype.changeStateAndRestartGame = function(){
   this.firstRun = true;
@@ -168,11 +210,12 @@ Game.prototype.gameLoop = function(){
   }
   this.drawBricks();
   this.drawRenderBalls();
+  this.renderCharlee();
 
 };
 
 Game.prototype.clearCanvasAndDisplayDetails = function(){
-  this.c.fillStyle = "black";
+  this.c.fillStyle = "gray";
   this.c.fillRect(0,0,canvas.width,canvas.height);
   this.c.font = "12px serif";
   this.c.fillStyle = "white";
@@ -222,8 +265,9 @@ Game.prototype.initApp = function(){
 }
 
 Game.prototype.drawBricks = function(){
+  this.c.fillStyle ="red";
   for (var i = 0; i < this.currentLevel.bricks.length; i++) {
-    //this.currentLevel.bricks[i].player ? false : this.currentLevel.bricks[i].y +=(200-this.currentLevel.bricks[i].y)*.1; //simple easing.
+    this.currentLevel.bricks[i].player ? false : this.currentLevel.bricks[i].y +=(200-this.currentLevel.bricks[i].y)*.1; //simple easing.
     if(this.currentLevel.bricks[i].player){
       this.currentLevel.bricks[i].velx = (this.currentPlayer.x-this.currentLevel.bricks[i].x)*.4;
       if(this.currentLevel.bricks[i].paddleTime > 0) {
@@ -256,18 +300,18 @@ Game.prototype.drawBricks = function(){
         } else {
           this.c.strokeStyle = this.currentLevel.bricks[i].color;
           this.c.lineWidth = 2;
-          this.c.strokeRect(this.currentLevel.bricks[i].x,this.currentLevel.bricks[i].y,this.currentLevel.bricks[i].w,this.currentLevel.bricks[i].h);
+          this.c.fillRect(this.currentLevel.bricks[i].x,this.currentLevel.bricks[i].y,this.currentLevel.bricks[i].w,this.currentLevel.bricks[i].h);
         }
       }
     } else {
       this.c.strokeStyle = this.currentLevel.bricks[i].color;
       this.c.lineWidth = 2;
-      this.c.strokeRect(this.currentLevel.bricks[i].x,this.currentLevel.bricks[i].y,this.currentLevel.bricks[i].w,this.currentLevel.bricks[i].h);
+      this.c.fillRect(this.currentLevel.bricks[i].x,this.currentLevel.bricks[i].y,this.currentLevel.bricks[i].w,this.currentLevel.bricks[i].h);
     }
     if(this.currentLevel.bricks[i].type==="Durable" && this.currentLevel.bricks[i].life>1){
       this.c.strokeStyle = "rgba(0,0,0,.5)";
       this.c.lineWidth = 2;
-      this.c.strokeRect(this.currentLevel.bricks[i].x,this.currentLevel.bricks[i].y,this.currentLevel.bricks[i].w,this.currentLevel.bricks[i].h);
+      this.c.fillRect(this.currentLevel.bricks[i].x,this.currentLevel.bricks[i].y,this.currentLevel.bricks[i].w,this.currentLevel.bricks[i].h);
     }
     this.currentLevel.bricks[i].timer<50 ? this.currentLevel.bricks[i].timer++: false;
   }
@@ -320,69 +364,6 @@ Game.prototype.collide = function(){
   }
 };
 
-Game.prototype.doCollide = function(i,j){
-  var decreaseLifeFlag = false;
-  this.currentLevel.balls[i].flashTimer = 9;
-  if(this.currentLevel.bricks[j].type==="Player"){
-    this.sounds.normalHit.play();
-  }else if(this.currentLevel.bricks[j].type==="Inert"){
-    decreaseLifeFlag = true;
-    this.sounds.normalHit.play();
-  }else if(this.currentLevel.bricks[j].type==="Durable"){
-    decreaseLifeFlag = true;
-    this.sounds.normalHit.play();
-  }else if(this.currentLevel.bricks[j].type==="Speedy"){
-    decreaseLifeFlag = true;
-    this.sounds.powerUp.play();
-    if(this.currentLevel.balls[i].velx<0) {
-      this.currentLevel.balls[i].velx -= 3;
-    } else {
-      this.currentLevel.balls[i].velx += 3;
-    }
-    if(this.currentLevel.balls[i].vely<0) {
-      this.currentLevel.balls[i].vely -= 3;
-    } else {
-      this.currentLevel.balls[i].vely += 3;
-    }
-  }else if (this.currentLevel.bricks[j].type==="Steady"){
-    this.sounds.steady.play();
-  }
-  if(decreaseLifeFlag) {
-    this.currentPlayer.score += this.currentLevel.bricks[j].score;
-    this.currentLevel.bricks[j].life -= 1;
-    if(this.currentLevel.bricks[j].powerUp.length>0) {
-      //powerup array being created
-      this.isTheMouseBeingPressed = false;
-      var newPowerUp = new PowerUP(this.currentLevel.bricks[j].x+(this.currentLevel.bricks[j].w/3),this.currentLevel.bricks[j].y+(this.currentLevel.bricks[j].h/3),25,5,this.currentLevel.bricks[j].powerUp);
-      this.currentLevel.powerUp.push(newPowerUp);
-    }
-    if(this.currentLevel.bricks[j].life <= 0) {
-      this.currentLevel.bricks.splice(j,1);
-    }
-    if(this.currentLevel.bricks.length === this.currentLevel.winCriteria && this.currentPlayer.lives>0){
-      this.handleLevelAdvance();
-    }
-  }
-}
-
-Game.prototype.screenShake = function(){
-
-}
-
-Game.prototype.handleLevelAdvance = function(){
-  this.level++;
-  if(levelConstructs.length===1){
-    this.firstRun = true;
-    this.audio.stop();
-    this.appState = STATE_WIN;
-  }else{
-    this.isTheMouseBeingPressed = false;
-    this.firstRun = true;
-    this.audio.stop();
-    this.appState = STATE_LOADING_LEVEL;
-  }
-}
-
 Game.prototype.checkCollision = function(thing1,thing2) {
   if((((thing1.y+thing1.vely) + thing1.h) > (thing2.y)) && ((thing1.y+thing1.vely) < (thing2.y + thing2.h)) && (((thing1.x+thing1.velx) + thing1.w) > thing2.x) && ((thing1.x+thing1.velx) < (thing2.x + thing2.w))){
     return true;
@@ -390,42 +371,6 @@ Game.prototype.checkCollision = function(thing1,thing2) {
     return false;
   }
 }
-
-Game.prototype.runPowerUpCollisions = function(k) {
-  if(this.currentLevel.powerUp[k].type === 'newBall') {
-    this.currentLevel.makeBall(this.currentLevel.bricks[0].x+32,538);
-  }
-  if(this.currentLevel.powerUp[k].type === 'extraLife') {
-    this.currentPlayer.lives++;
-  }
-  if(this.currentLevel.powerUp[k].type === 'slowDown') {
-    for(var i = 0; i < this.currentLevel.balls.length; i++){
-      console.log(this.currentLevel.balls[i].velx);
-      if(this.currentLevel.balls[i].velx > 4 || this.currentLevel.balls[i].velx < -4) {
-        if (this.currentLevel.balls[i].velx < 0){
-          this.currentLevel.balls[i].velx += 2;
-        } else {
-          this.currentLevel.balls[i].velx -= 2;
-        }
-      }
-      if(this.currentLevel.balls[i].vely > 4 || this.currentLevel.balls[i].vely < -4) {
-        if (this.currentLevel.balls[i].vely < 0){
-          this.currentLevel.balls[i].vely += 2;
-        } else {
-          this.currentLevel.balls[i].vely -= 2;
-        }
-      }
-    }
-  }
-  if(this.currentLevel.powerUp[k].type === 'paddleWidth') {
-    this.currentLevel.bricks[0].finalw = 120;
-    this.currentLevel.bricks[0].paddleTime = 500;
-  }
-  if(this.currentLevel.powerUp[k].type === 'machineGun') {
-    this.currentLevel.bricks[0].machineGunTime = 350;
-  }
-  this.currentLevel.powerUp.splice(k,1);
-};
 
 Game.prototype.testWalls = function(){
   for (var i = 0, max = this.currentLevel.balls.length; i < max; i = i + 1) {
@@ -452,26 +397,6 @@ Game.prototype.testWalls = function(){
     this.currentPlayer.x = 0;
   }
 };
-
-Game.prototype.playerFlash = function (i){
-  this.c.strokeStyle = 'white';
-  this.c.lineWidth = 2;
-  this.c.strokeRect(this.currentLevel.bricks[i].x,this.currentLevel.bricks[i].y,this.currentLevel.bricks[i].w,this.currentLevel.bricks[i].h);
-  this.currentLevel.bricks[i].playerFlashTimer--;
-};
-
-Game.prototype.ballFlash = function(i){
-  //do animation here
-  console.log('it works');
-  if(this.currentLevel.balls[i].flashTimer > 6 || this.currentLevel.balls[i].flashTimer < 4) {
-    this.c.fillStyle = "white";
-    this.c.beginPath();
-    this.c.arc(this.currentLevel.balls[i].x+(this.currentLevel.balls[i].w/2),this.currentLevel.balls[i].y+(this.currentLevel.balls[i].w/2),this.currentLevel.balls[i].w/2,0,Math.PI*2,true);
-    this.c.closePath();
-    this.c.fill();
-  }
-  this.currentLevel.balls[i].flashTimer--;
-}
 
 Game.prototype.drawRenderBalls = function(){
   if(this.currentLevel.bricks[1].y === this.currentLevel.bricks[1].finalY) {
@@ -525,34 +450,6 @@ Game.prototype.updatePosition = function(){
   if(this.currentLevel.projectiles.length > 0){
     this.updateProjectile();
     this.drawProjectiles();
-  }
-};
-
-Game.prototype.updatePowerUp = function() {
-  for(var i = 0; i < this.currentLevel.powerUp.length; i++){
-    this.currentLevel.powerUp[i].nexty += this.currentLevel.powerUp[i].vely;
-  }
-}
-
-Game.prototype.drawPowerUp = function(j){
-  for(var i = 0; i < this.currentLevel.powerUp.length; i++){
-    this.currentLevel.powerUp[i].y = this.currentLevel.powerUp[i].nexty;
-    this.c.fillStyle = this.currentLevel.powerUp[i].color;
-    this.c.fillRect(this.currentLevel.powerUp[i].x,this.currentLevel.powerUp[i].y,this.currentLevel.powerUp[i].w,this.currentLevel.powerUp[i].h);
-  }
-};
-
-Game.prototype.updateProjectile = function(){
-  for(var i = 0; i < this.currentLevel.projectiles.length; i++){
-    this.currentLevel.projectiles[i].nexty += this.currentLevel.projectiles[i].vely;
-  }
-};
-
-Game.prototype.drawProjectiles = function(){
-  for(var i = 0; i < this.currentLevel.projectiles.length; i++){
-    this.currentLevel.projectiles[i].y = this.currentLevel.projectiles[i].nexty;
-    this.c.fillStyle = this.currentLevel.projectiles[i].color;
-    this.c.fillRect(this.currentLevel.projectiles[i].x,this.currentLevel.projectiles[i].y,this.currentLevel.projectiles[i].w,this.currentLevel.projectiles[i].h);
   }
 };
 
